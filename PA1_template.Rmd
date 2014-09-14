@@ -1,25 +1,103 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
+author: Scott Harrison
+date: September 14, 2014
 output: 
   html_document:
     keep_md: true
 ---
 
+Reproducible Research: Peer Assessment 1  
+========================================
+*Created by Scott Harrison on September 14, 2014*  
 
 ## Loading and preprocessing the data
-
-
+```{r getdata, echo = TRUE}
+library(reshape2)
+data <- read.csv("activity.csv", header = TRUE, na.strings = "NA")
+data$date <- as.Date(data$date, "%Y-%m-%d")
+datesummary <- dcast(data, date~interval, value.var = "steps")
+datesummary <- cbind(datesummary, rowSums(datesummary[2:ncol(datesummary)], na.rm = TRUE))
+colnames(datesummary) <- c(colnames(datesummary[1:289]), "total")
+```
 
 ## What is mean total number of steps taken per day?
+```{r totalsteps, echo = TRUE}
+hist(datesummary[, "total"], 
+     main = "Count by Total Steps Per Day", 
+     xlab = "Total Steps", 
+     ylab = "Number of Days", 
+     col = "red",
+     yaxp = c(0, 30, 6))
+box(which = "outer", col = "black")
+totalsteps_mean <- format(mean(datesummary[, "total"]), nsmall = 1)
+totalsteps_median <- format(median(datesummary[, "total"]), nsmall = 1)
+```
 
-
+The mean total steps per day is `r totalsteps_mean` and the median total steps per day is 
+`r totalsteps_median`.  Below is a histogram of the total steps per day.  
 
 ## What is the average daily activity pattern?
+```{r averagesteps, echo = TRUE}
+averagesteps <- colMeans(datesummary[2:289], na.rm = TRUE)
+plot(names(averagesteps), 
+     averagesteps, 
+     type = "l",
+     main = "Average Steps per 5-Minute Interval",
+     xlab = "5-Minute Interval",
+     ylab = "Average Steps")
+box(which = "outer", col = "black")
+maxavg <- max(averagesteps)
+maxavgcolidx <- which(match(averagesteps, maxavg) == 1)
+maxavginterval <- names(averagesteps[maxavgcolidx])
+```
 
-
+The max average steps for a 5-minute interval is `r maxavg` for the `r maxavginterval` interval.  
 
 ## Imputing missing values
+```{r missingvalues, echo = TRUE}
+missingnum <- sum(is.na(data$steps))
 
+datesummaryimp <- datesummary[1:ncol(datesummary) - 1]
+for (row in 1:nrow(datesummaryimp)) {
+    for (col in 2:ncol(datesummaryimp) - 1) {
+        if (is.na(datesummaryimp[row, col])) {
+            datesummaryimp[row, col] <- averagesteps[col]
+        }
+    }   
+}
+datesummaryimp <- cbind(datesummaryimp, rowSums(datesummaryimp[2:ncol(datesummaryimp)], na.rm = TRUE))
+colnames(datesummaryimp) <- c(colnames(datesummaryimp[1:289]), "total")
 
+hist(datesummaryimp[, "total"], 
+     main = "Count by Total Steps Per Day", 
+     xlab = "Total Steps", 
+     ylab = "Number of Days", 
+     col = "red",
+     yaxp = c(0, 40, 8))
+box(which = "outer", col = "black")
+totalstepsimp_mean <- format(mean(datesummaryimp[, "total"]), nsmall = 1)
+totalstepsimp_median <- format(median(datesummaryimp[, "total"]), nsmall = 1)
+```
+
+There were a total of `r missingnum` missing values.  I imputed by replacing NAs with the average value for that 5-minute interval for all days.  The mean total steps per day after imputation is `r totalstepsimp_mean` and the median total steps per day after imputation is `r totalstepsimp_median`.  Below is a histogram of the total steps per day after imputation.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r weekends, echo = TRUE}
+weekend <- function(date) {
+    dayofweek <- weekdays(date)
+    if (dayofweek == "Saturday" | dayofweek == "Sunday") {
+        return ("weekend")
+    }
+    else {
+        return ("weekday")
+    }
+}
+
+weekpart <- sapply(datesummaryimp$date, weekend)
+
+columns <- c("weekpart", colnames(datesummaryimp[2:ncol(datesummaryimp)]))
+datesummaryimp2 <- cbind(weekpart, datesummaryimp[2:ncol(datesummaryimp)])
+colnames(datesummaryimp2) <- columns
+
+```
