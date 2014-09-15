@@ -18,7 +18,7 @@ data <- read.csv("activity.csv", header = TRUE, na.strings = "NA")
 data$date <- as.Date(data$date, "%Y-%m-%d")
 datesummary <- dcast(data, date~interval, value.var = "steps")
 datesummary <- cbind(datesummary, rowSums(datesummary[2:ncol(datesummary)], na.rm = TRUE))
-colnames(datesummary) <- c(colnames(datesummary[1:289]), "total")
+colnames(datesummary) <- c(colnames(datesummary[1:ncol(datesummary) - 1]), "total")
 ```
 
 ## What is mean total number of steps taken per day?
@@ -35,7 +35,7 @@ totalsteps_median <- format(median(datesummary[, "total"]), nsmall = 1)
 ```
 
 The mean total steps per day is `r totalsteps_mean` and the median total steps per day is 
-`r totalsteps_median`.  Below is a histogram of the total steps per day.  
+`r totalsteps_median`.  Above is a histogram of the total steps per day.  
 
 ## What is the average daily activity pattern?
 ```{r averagesteps, echo = TRUE}
@@ -60,9 +60,9 @@ missingnum <- sum(is.na(data$steps))
 
 datesummaryimp <- datesummary[1:ncol(datesummary) - 1]
 for (row in 1:nrow(datesummaryimp)) {
-    for (col in 2:ncol(datesummaryimp) - 1) {
+    for (col in 2:ncol(datesummaryimp)) {
         if (is.na(datesummaryimp[row, col])) {
-            datesummaryimp[row, col] <- averagesteps[col]
+            datesummaryimp[row, col] <- averagesteps[col - 1]
         }
     }   
 }
@@ -84,6 +84,9 @@ There were a total of `r missingnum` missing values.  I imputed by replacing NAs
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r weekends, echo = TRUE}
+library(lattice)
+datamelt <- melt(datesummaryimp[1:(ncol(datesummary) - 1)], id = "date")
+
 weekend <- function(date) {
     dayofweek <- weekdays(date)
     if (dayofweek == "Saturday" | dayofweek == "Sunday") {
@@ -94,10 +97,20 @@ weekend <- function(date) {
     }
 }
 
-weekpart <- sapply(datesummaryimp$date, weekend)
+weekpart <- sapply(datamelt$date, weekend)
 
-columns <- c("weekpart", colnames(datesummaryimp[2:ncol(datesummaryimp)]))
-datesummaryimp2 <- cbind(weekpart, datesummaryimp[2:ncol(datesummaryimp)])
-colnames(datesummaryimp2) <- columns
+columns <- c("weekpart", "interval", "value")
+datamelt <- cbind(weekpart, datamelt[2:3])
+colnames(datamelt) <- columns
 
+databyinterval <- aggregate(value ~ weekpart + interval, data = datamelt, mean)
+
+databyinterval$interval <- as.numeric(levels(databyinterval$interval))[databyinterval$interval]
+
+xyplot(value ~ interval | weekpart, 
+       databyinterval, 
+       layout = c(1, 2),
+       type = "l",
+       ylab = "Number of Steps",
+       xlab = "Interval")
 ```
