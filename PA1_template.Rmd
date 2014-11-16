@@ -80,7 +80,7 @@ totalstepsimp_mean <- format(mean(datesummaryimp[, "total"]), nsmall = 1)
 totalstepsimp_median <- format(median(datesummaryimp[, "total"]), nsmall = 1)
 ```
 
-There were a total of `r missingnum` missing values.  I imputed by replacing NAs with the average value for that 5-minute interval for all days.  The mean total steps per day after imputation is `r totalstepsimp_mean` and the median total steps per day after imputation is `r totalstepsimp_median`.  Below is a histogram of the total steps per day after imputation.  
+There were a total of `r missingnum` missing values.  I imputed by replacing NAs with the average value for that 5-minute interval for all days.  The mean total steps per day after imputation is `r totalstepsimp_mean` and the median total steps per day after imputation is `r totalstepsimp_median`.  Above is a histogram of the total steps per day after imputation.  After imputation, the mean value is more prominant.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r weekends, echo = TRUE}

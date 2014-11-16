@@ -1,11 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-author: Scott Harrison
-date: September 14, 2014
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
+Scott Harrison  
+September 14, 2014  
 
 Reproducible Research: Peer Assessment 1  
 ========================================
@@ -34,7 +29,7 @@ hist(datesummary[, "total"],
 box(which = "outer", col = "black")
 ```
 
-![plot of chunk totalsteps](figure/totalsteps.png) 
+![plot of chunk totalsteps](./PA1_template_files/figure-html/totalsteps.png) 
 
 ```r
 totalsteps_mean <- format(mean(datesummary[, "total"]), nsmall = 1)
@@ -57,7 +52,7 @@ plot(names(averagesteps),
 box(which = "outer", col = "black")
 ```
 
-![plot of chunk averagesteps](figure/averagesteps.png) 
+![plot of chunk averagesteps](./PA1_template_files/figure-html/averagesteps.png) 
 
 ```r
 maxavg <- max(averagesteps)
@@ -92,14 +87,14 @@ hist(datesummaryimp[, "total"],
 box(which = "outer", col = "black")
 ```
 
-![plot of chunk missingvalues](figure/missingvalues.png) 
+![plot of chunk missingvalues](./PA1_template_files/figure-html/missingvalues.png) 
 
 ```r
 totalstepsimp_mean <- format(mean(datesummaryimp[, "total"]), nsmall = 1)
 totalstepsimp_median <- format(median(datesummaryimp[, "total"]), nsmall = 1)
 ```
 
-There were a total of 2304 missing values.  I imputed by replacing NAs with the average value for that 5-minute interval for all days.  The mean total steps per day after imputation is 10766.2 and the median total steps per day after imputation is 10766.2.  Below is a histogram of the total steps per day after imputation.  
+There were a total of 2304 missing values.  I imputed by replacing NAs with the average value for that 5-minute interval for all days.  The mean total steps per day after imputation is 10766.2 and the median total steps per day after imputation is 10766.2.  Above is a histogram of the total steps per day after imputation.  After imputation, the mean value is more prominant.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -135,4 +130,4 @@ xyplot(value ~ interval | weekpart,
        xlab = "Interval")
 ```
 
-![plot of chunk weekends](figure/weekends.png) 
+![plot of chunk weekends](./PA1_template_files/figure-html/weekends.png) 
