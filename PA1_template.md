@@ -5,15 +5,14 @@ date: "February 28, 2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Loading and preprocessing the data
 
 Unzips data, loads csv and converts date column from factor to date.  
 
-```{r load, echo = TRUE}
+
+```r
 data_zip <- "activity.zip"
 unzip(data_zip)
 
@@ -24,7 +23,8 @@ data$date <- as.Date(data$date)
 
 ## What is mean total number of steps taken per day?
 
-```{r dailyhist, echo = TRUE}
+
+```r
 daily <- aggregate(data$steps, by = list(data$date), FUN = sum)
 names(daily) <- c("Date", "TotalSteps")
 daily <- daily[!is.na(daily$TotalSteps), ]
@@ -41,18 +41,31 @@ hist(daily$TotalSteps,
      ylab = "Total Steps")
 ```
 
+![plot of chunk dailyhist](figure/dailyhist-1.png)
+
 The mean of total daily steps is:
-```{r mean, echo = TRUE}
+
+```r
 mean(daily$TotalSteps)
 ```
+
+```
+## [1] 10766.19
+```
 The median total daily steps is:
-```{r median}
+
+```r
 median(daily$TotalSteps)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
 
-```{r intervals}
+
+```r
 intervals <- aggregate(data$steps, by = list(data$interval), FUN = mean, na.rm = TRUE)
 names(intervals) <- c("Interval", "TotalSteps")
 intervals <- intervals[!is.na(intervals$TotalSteps), ]
@@ -67,20 +80,33 @@ plot(TotalSteps ~ Interval,
      lwd = 2)
 ```
 
+![plot of chunk intervals](figure/intervals-1.png)
+
 The 5-minute interval with the most steps is interval:
-```{r max_interval}
+
+```r
 intervals$Interval[which(intervals$TotalSteps == max(intervals$TotalSteps))]
+```
+
+```
+## [1] 835
 ```
 
 ## Imputing missing values
 
 The number of missing values is:
-```{r missing}
+
+```r
 sum(is.na(data$steps))
 ```
 
+```
+## [1] 2304
+```
+
 To impute values, I substitued the average value for the 5-minute interval for the NA.
-```{r impute}
+
+```r
 data_imputed <- merge(data, 
                       intervals, 
                       by.x = "interval", 
@@ -92,10 +118,10 @@ daily_imputed <- aggregate(data_imputed$steps_imputed,
                            by = list(data_imputed$date),
                            FUN = sum)
 names(daily_imputed) <- c("Date", "TotalSteps")
-
 ```
 
-```{r imputed_hist}
+
+```r
 bucket_width <- 1000
 buckets <- seq(from = 0,
                by = bucket_width,
@@ -106,24 +132,48 @@ hist(daily_imputed$TotalSteps,
      main = "Daily Total Steps Histogram",
      xlab = "1000 Step Buckets",
      ylab = "Total Days")
-
 ```
+
+![plot of chunk imputed_hist](figure/imputed_hist-1.png)
 
 The mean of total daily steps with imputed values is:
-```{r mean_imputed, echo = TRUE}
+
+```r
 mean(daily_imputed$TotalSteps)
 ```
+
+```
+## [1] 10766.19
+```
 The median total daily steps with imputed values is:
-```{r median_imputed}
+
+```r
 median(daily_imputed$TotalSteps)
+```
+
+```
+## [1] 10766.19
 ```
 
 The effect of imputing values only added more average days because NAs are only on specific days.
 
-```{r dailyNA}
+
+```r
 dailyNA <- aggregate(is.na(data$steps), by = list(data$date), sum)
 names(dailyNA) <- c("Date", "NAs")
 dailyNA[dailyNA$NAs > 0, ]
+```
+
+```
+##          Date NAs
+## 1  2012-10-01 288
+## 8  2012-10-08 288
+## 32 2012-11-01 288
+## 35 2012-11-04 288
+## 40 2012-11-09 288
+## 41 2012-11-10 288
+## 45 2012-11-14 288
+## 61 2012-11-30 288
 ```
 Imputing average daily values for entire days does not really help and the mean stays the same.  The median now is the mean because more mean values were added.
 
@@ -131,7 +181,8 @@ Imputing average daily values for entire days does not really help and the mean 
 
 The most noticeable difference between weekdays and weekends is that there is a large mount of steps on weekday mornings that are not in the weekends.  This is probably due to work related movement.  It also looks like weekdays are a bit more sedantary.
 
-```{r weekends}
+
+```r
 library(lattice)
 
 data_imputed$weekend <- factor(weekdays(data_imputed$date) %in% c("Saturday", "Sunday"), 
@@ -148,6 +199,8 @@ xyplot(TotalSteps ~ Interval | Weekend,
        main = "Steps by Weekend / Weekday",
        ylab = "Number of Steps")
 ```
+
+![plot of chunk weekends](figure/weekends-1.png)
 
 
 
